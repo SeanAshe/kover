@@ -1,13 +1,6 @@
 name: Build & Deploy
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "README.md"
-      - "LICENSE"
-      - ".github/**/*"
   workflow_dispatch:
 
 jobs:
