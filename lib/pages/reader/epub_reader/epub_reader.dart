@@ -1,8 +1,10 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/mapping/enums/read_direction.dart';
+import 'package:kover/pages/reader/epub_reader/epub_comic_images.dart';
 import 'package:kover/pages/reader/epub_reader/epub_horizontal_subpages.dart';
 import 'package:kover/pages/reader/epub_reader/epub_measure_root.dart';
+import 'package:kover/pages/reader/epub_reader/is_comic_epub.dart';
 import 'package:kover/pages/reader/epub_reader/epub_reader_provider.dart';
 import 'package:kover/pages/reader/epub_reader/epub_theme_override.dart';
 import 'package:kover/pages/reader/epub_reader/epub_toc_drawer.dart';
@@ -297,6 +299,24 @@ class _Page extends HookConsumerWidget {
               });
             }
 
+            final pages = vertical
+                ? EpubVerticalSubpages(
+                    key: ValueKey(page),
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                    readingListId: readingListId,
+                    page: page,
+                    imageCache: imageCache,
+                  )
+                : EpubHorizontalSubpages(
+                    key: ValueKey(page),
+                    seriesId: seriesId,
+                    chapterId: chapterId,
+                    readingListId: readingListId,
+                    page: page,
+                    imageCache: imageCache,
+                  );
+
             return SelectionArea(
               onSelectionChanged: (selection) {
                 onSelectionChanged?.call(
@@ -307,23 +327,9 @@ class _Page extends HookConsumerWidget {
                 onNotification: data.navigationGesturesEnabled
                     ? handleScrollNotification
                     : null,
-                child: vertical
-                    ? EpubVerticalSubpages(
-                        key: ValueKey(page),
-                        seriesId: seriesId,
-                        chapterId: chapterId,
-                        readingListId: readingListId,
-                        page: page,
-                        imageCache: imageCache,
-                      )
-                    : EpubHorizontalSubpages(
-                        key: ValueKey(page),
-                        seriesId: seriesId,
-                        chapterId: chapterId,
-                        readingListId: readingListId,
-                        page: page,
-                        imageCache: imageCache,
-                      ),
+                child: isComicEpub(ref, seriesId: seriesId)
+                    ? ComicNotchClip(child: pages)
+                    : pages,
               ),
             );
           },

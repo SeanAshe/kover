@@ -119,11 +119,7 @@ class const EpubHorizontalSubpages({
         );
       }
 
-      // Tall fit-width and original-size pages can be panned inside the page.
-      return SingleChildScrollView(
-        primary: false,
-        child: content,
-      );
+      return content;
     }
 
     return PageView.builder(
