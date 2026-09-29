@@ -207,12 +207,9 @@ class _ComicPageState extends State<_ComicPage> {
     final frame = _frame;
     if (frame == null) return false;
     final horizontal = total.dx.abs() >= total.dy.abs();
-    // Horizontal drags at the initial scale belong to the page view. Claiming
-    // them makes the page swipe wait out the gesture arena and feel stuck.
-    if (horizontal) {
-      return widget.scale != .original && _scale > 1.001;
+    if (horizontal || _scale > 1.001) {
+      return _scale > 1.001;
     }
-    if (widget.scale != .original && _scale > 1.001) return true;
     final height = frame.base.height;
     if (widget.scale == .original) {
       return (height - frame.viewHeight).abs() > 0.5;
@@ -234,15 +231,9 @@ class _ComicPageState extends State<_ComicPage> {
   void _onScaleUpdate(ScaleUpdateDetails details) {
     final frame = _frame;
     if (frame == null) return;
-    final zoomable = widget.scale != .original;
-    final newScale = zoomable
-        ? (_gestureScale * details.scale).clamp(1.0, _maxScale)
-        : 1.0;
+    final newScale = (_gestureScale * details.scale).clamp(1.0, _maxScale);
 
-    // Min scale is the fitted layout. Panning at that scale is only possible
-    // when the fitted image is already larger than the safe area.
-    if (zoomable &&
-        newScale <= 1.001 &&
+    if (newScale <= 1.001 &&
         (_gestureScale > 1.001 || !frame.overflows)) {
       _setTransform(1, Offset.zero);
       return;
