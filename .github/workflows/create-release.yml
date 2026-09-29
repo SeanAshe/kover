@@ -75,7 +75,7 @@ jobs:
 
       - name: Build
         run: |
-          flutter build apk --release --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}
+          flutter build apk --release --target-platform android-arm64 --build-name=${{ needs.version.outputs.version }} --build-number=${{ needs.version.outputs.build_number }}
 
       - name: Upload artifact
         env:
