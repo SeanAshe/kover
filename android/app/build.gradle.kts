@@ -1,9 +1,16 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+}
+
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -28,20 +35,27 @@ android {
 
     signingConfigs {
         create("release") {
-            val path = System.getenv("KEYSTORE_PATH")
-            if (!path.isNullOrBlank()) {
-                storeFile = file(path)
+            val envPath = System.getenv("KEYSTORE_PATH")
+            if (!envPath.isNullOrBlank()) {
+                storeFile = file(envPath)
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEY_ALIAS")
                 keyPassword = System.getenv("KEY_PASSWORD")
+                storeType = "pkcs12"
+            } else if (keystorePropertiesFile.exists()) {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeType = keystoreProperties.getProperty("storeType") ?: "pkcs12"
             }
         }
     }
 
     buildTypes {
         getByName("release") {
-            val path = System.getenv("KEYSTORE_PATH")
-            signingConfig = if (!path.isNullOrBlank()) {
+            val envPath = System.getenv("KEYSTORE_PATH")
+            signingConfig = if (!envPath.isNullOrBlank() || keystorePropertiesFile.exists()) {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")
