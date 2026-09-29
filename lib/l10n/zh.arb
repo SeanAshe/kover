@@ -713,5 +713,292 @@
     "availableDestinations": "可用目的地",
     "@availableDestinations": {
         "description": "Label for the available destinations section"
+    },
+    "theme": "主题",
+    "@theme": {
+        "description": "Label for the epub reader theme setting"
+    },
+    "black": "黑色",
+    "@black": {
+        "description": "Label for the black theme option"
+    },
+    "sepia": "棕褐色",
+    "@sepia": {
+        "description": "Label for the sepia theme option"
+    },
+    "matchAppTheme": "跟随应用主题",
+    "@matchAppTheme": {
+        "description": "Label for the epub reader match app theme option"
+    },
+    "sortOrder": "排序方式",
+    "@sortOrder": {
+        "description": "Label for the sort order option in list"
+    },
+    "progress": "进度",
+    "@progress": {
+        "description": "Label for sorting by progress option"
+    },
+    "lastRead": "最近阅读",
+    "@lastRead": {
+        "description": "Label for sorting by last read option"
+    },
+    "coverArtists": "封面画师",
+    "@coverArtists": {
+        "description": "Label for the cover artists metadata in the series details page"
+    },
+    "publishers": "出版社",
+    "@publishers": {
+        "description": "Label for the publishers metadata in the series details page"
+    },
+    "characters": "角色",
+    "@characters": {
+        "description": "Label for the characters metadata in the series details page"
+    },
+    "pencillers": "线稿",
+    "@pencillers": {
+        "description": "Label for the pencillers metadata in the series details page"
+    },
+    "inkers": "上墨",
+    "@inkers": {
+        "description": "Label for the inkers metadata in the series details page"
+    },
+    "imprints": "出品方",
+    "@imprints": {
+        "description": "Label for the imprints metadata in the series details page"
+    },
+    "colorists": "上色",
+    "@colorists": {
+        "description": "Label for the colorists metadata in the series details page"
+    },
+    "letterers": "嵌字",
+    "@letterers": {
+        "description": "Label for the letterers metadata in the series details page"
+    },
+    "editors": "编辑",
+    "@editors": {
+        "description": "Label for the editors metadata in the series details page"
+    },
+    "translators": "译者",
+    "@translators": {
+        "description": "Label for the translators metadata in the series details page"
+    },
+    "teams": "团队",
+    "@teams": {
+        "description": "Label for the teams metadata in the series details page"
+    },
+    "locations": "地点",
+    "@locations": {
+        "description": "Label for the locations metadata in the series details page"
+    },
+    "syncingSeriesDetails": "正在同步系列详情",
+    "@syncingSeriesDetails": {
+        "description": "Label for the syncing series details phase"
+    },
+    "syncingWantToRead": "正在同步想读",
+    "@syncingWantToRead": {
+        "description": "Label for the syncing Want to Read phase"
+    },
+    "syncingSmartFilters": "正在同步智能筛选",
+    "@syncingSmartFilters": {
+        "description": "Label for the syncing smart filters phase"
+    },
+    "syncingDashboard": "正在同步主页顺序",
+    "@syncingDashboard": {
+        "description": "Label for the dashboard syncing phase"
+    },
+    "refreshingServerFonts": "正在刷新服务器字体",
+    "@refreshingServerFonts": {
+        "description": "Message shown while refreshing server fonts"
+    },
+    "startReading": "开始阅读",
+    "@startReading": {
+        "description": "Label for the start reading button"
+    },
+    "expandToEdges": "延伸到边缘",
+    "@expandToEdges": {
+        "description": "Label for the expand to edges reader setting"
+    },
+    "expandToEdgesDescription": "将内容延伸到屏幕边缘，忽略安全区域。在部分设备上，内容可能被裁切或显示在硬件下方，例如打孔摄像头。",
+    "@expandToEdgesDescription": {
+        "description": "Description for the expand to edges reader setting"
+    },
+    "lockHorizontalPan": "锁定水平滑动",
+    "@lockHorizontalPan": {
+        "description": "Label for the lock horizontal panning setting in the vertical reader"
+    },
+    "invalidCertificate": "证书无效",
+    "@invalidCertificate": {
+        "description": "User display error shown when the server certificate cannot be validated"
+    },
+    "invalidCertificateDescription": "无法验证服务器的 HTTPS 证书。请检查证书，或在设置中启用“忽略证书验证”（仅在你信任该服务器时使用）。",
+    "@invalidCertificateDescription": {
+        "description": "Instructions shown when the server certificate cannot be validated"
+    },
+    "unsupportedKavitaVersion": "此版本的 Kover 使用 Kavita {supported} 的 API 定义。部分功能可能无法按预期工作。",
+    "@unsupportedKavitaVersion": {
+        "description": "Warning shown when the connected Kavita server version is not supported by this version of Kover",
+        "placeholders": {
+            "supported": {
+                "description": "The Kavita version this version of Kover supports",
+                "type": "String",
+                "example": "0.9.1.0"
+            }
+        }
+    },
+    "ignoreCertificateValidation": "忽略证书验证",
+    "@ignoreCertificateValidation": {
+        "description": "Setting that allows a trusted server with an invalid HTTPS certificate"
+    },
+    "ignoreCertificateValidationDescription": "即使无法验证服务器的 HTTPS 证书也允许连接。请仅对你信任的服务器使用此选项。",
+    "@ignoreCertificateValidationDescription": {
+        "description": "Security warning for ignoring HTTPS certificate validation"
+    },
+    "navigationGestures": "导航手势",
+    "@navigationGestures": {
+        "description": "Label for the enable navigation gestures reader option"
+    },
+    "keybinds": "阅读器快捷键",
+    "@keybinds": {
+        "description": "Label for the keybinds settings section"
+    },
+    "keybindNextPage": "下一页",
+    "@keybindNextPage": {
+        "description": "Label for the next page keyboard binding setting"
+    },
+    "keybindPreviousPage": "上一页",
+    "@keybindPreviousPage": {
+        "description": "Label for the previous page keyboard binding setting"
+    },
+    "keybindPressAKey": "请按任意键…",
+    "@keybindPressAKey": {
+        "description": "Placeholder shown while waiting for a key press in the keybind capture dialog"
+    },
+    "keybindAlreadyAssigned": "该组合已被占用",
+    "@keybindAlreadyAssigned": {
+        "description": "Error shown when a captured keybind is already used by another action"
+    },
+    "keybindVolumeUp": "音量加",
+    "@keybindVolumeUp": {
+        "description": "Label for the volume up key when shown as a keybinding"
+    },
+    "keybindVolumeDown": "音量减",
+    "@keybindVolumeDown": {
+        "description": "Label for the volume down key when shown as a keybinding"
+    },
+    "appearance": "外观",
+    "@appearance": {
+        "description": "Label for the appearance settings section"
+    },
+    "reduceAnimations": "减少动画",
+    "@reduceAnimations": {
+        "description": "Label for the reduce animation setting"
+    },
+    "reduceAnimationsDescription": "关闭大部分动画和阅读器翻页过渡。注意：启用后，水平阅读模式将无法使用滑动手势。",
+    "@reduceAnimationsDescription": {
+        "description": "Description for the reduce animation setting"
+    },
+    "paragraphSpacing": "段落间距",
+    "@paragraphSpacing": {
+        "description": "Label for the paragraph spacing setting"
+    },
+    "logs": "日志",
+    "@logs": {
+        "description": "Label for the logs settings section"
+    },
+    "copiedToClipboard": "已复制到剪贴板",
+    "@copiedToClipboard": {
+        "description": "Message shown when a value is copied to the clipboard"
+    },
+    "removeFromOnDeck": "从继续阅读中移除",
+    "@removeFromOnDeck": {
+        "description": "Label for the remove from on deck context menu item"
+    },
+    "syncingOnDeck": "正在同步继续阅读",
+    "@syncingOnDeck": {
+        "description": "Label for the syncing on deck phase"
+    },
+    "ongoing": "连载中",
+    "@ongoing": {
+        "description": "Label for the 'ongoing' publication status"
+    },
+    "completed": "已完结",
+    "@completed": {
+        "description": "Label for the 'completed' publication status"
+    },
+    "hiatus": "休刊",
+    "@hiatus": {
+        "description": "Label for the 'hiatus' publication status"
+    },
+    "cancelled": "已取消",
+    "@cancelled": {
+        "description": "Label for the 'cancelled' publication status"
+    },
+    "ended": "已结束",
+    "@ended": {
+        "description": "Label for the 'ended' publication status"
+    },
+    "unknown": "未知",
+    "@unknown": {
+        "description": "Label for the 'unknown' publication status"
+    },
+    "tags": "标签",
+    "@tags": {
+        "description": "Label for the tags section in the series details page"
+    },
+    "textAlignment": "文本对齐",
+    "@textAlignment": {
+        "description": "Label for the text alignment setting"
+    },
+    "left": "左对齐",
+    "@left": {
+        "description": "Label for the left text alignment option"
+    },
+    "center": "居中",
+    "@center": {
+        "description": "Label for the center text alignment option"
+    },
+    "right": "右对齐",
+    "@right": {
+        "description": "Label for the right text alignment option"
+    },
+    "justify": "两端对齐",
+    "@justify": {
+        "description": "Label for the justify text alignment option"
+    },
+    "removeParagraphIndentation": "移除段落缩进",
+    "@removeParagraphIndentation": {
+        "description": "Label for the remove paragraph indentation setting"
+    },
+    "removeParagraphIndentationDescription": "启用后会去掉文本的段落缩进。关闭后保留 EPUB 原有缩进。",
+    "@removeParagraphIndentationDescription": {
+        "description": "Description for the remove paragraphs indent setting"
+    },
+    "font": "字体",
+    "@font": {
+        "description": "Label for the font override setting"
+    },
+    "fontDescription": "用自定义字体替换 EPUB 字体。可用字体从服务器同步。注意：仅支持用户字体，内置字体无法下载到客户端。",
+    "@fontDescription": {
+        "description": "Description for the font override setting"
+    },
+    "defaultLabel": "默认",
+    "@defaultLabel": {
+        "description": "Label for a default option in a setting"
+    },
+    "startupLoadingMessage": "正在准备，请稍候…",
+    "@startupLoadingMessage": {
+        "description": "Message shown when the app is starting up and loading data"
+    },
+    "directionality": "布局方向",
+    "@directionality": {
+        "description": "Label for the layout directionality setting, which determines the global ltr/rtl layout of the app"
+    },
+    "directionalityDescription": "覆盖当前语言的默认布局方向，应用于整个应用。",
+    "@directionalityDescription": {
+        "description": "Description for the layout directionality setting"
+    },
+    "localeDefault": "跟随语言",
+    "@localeDefault": {
+        "description": "Label for the layout directionality locale default setting"
     }
 }
