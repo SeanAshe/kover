@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:html/parser.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
@@ -96,6 +97,7 @@ class _ComicPageState extends State<_ComicPage> {
   double? _laidOutNotch;
   _ComicFrame? _frame;
 
+  int _loadGeneration = 0;
   double _scale = 1;
   Offset _pan = Offset.zero;
   double _gestureScale = 1;
@@ -105,7 +107,7 @@ class _ComicPageState extends State<_ComicPage> {
   @override
   void initState() {
     super.initState();
-    _bindImage();
+    _loadImage();
   }
 
   @override
@@ -121,10 +123,10 @@ class _ComicPageState extends State<_ComicPage> {
       _pixelWidth = null;
       _pixelHeight = null;
       _frame = null;
+      _provider = null;
       _scale = 1;
       _pan = Offset.zero;
-      _bindImage();
-      _listen();
+      _loadImage();
       return;
     }
     if (oldWidget.scale != widget.scale) {
@@ -139,13 +141,20 @@ class _ComicPageState extends State<_ComicPage> {
     super.dispose();
   }
 
-  void _bindImage() {
-    final bytes = _decodeDataUri(widget.source);
-    final header = bytes == null ? null : imagePixelSize(bytes);
-    _pixelWidth = header?.width;
-    _pixelHeight = header?.height;
-    _provider = bytes == null ? NetworkImage(widget.source) : MemoryImage(bytes);
-    _listenedSource = null;
+  Future<void> _loadImage() async {
+    final generation = ++_loadGeneration;
+    final source = widget.source;
+    final decoded = await compute(_decodeComicImage, source);
+    if (!mounted || generation != _loadGeneration) return;
+    setState(() {
+      _pixelWidth = decoded == null || decoded.width == 0 ? null : decoded.width;
+      _pixelHeight = decoded == null || decoded.height == 0
+          ? null
+          : decoded.height;
+      _provider = decoded == null ? NetworkImage(source) : MemoryImage(decoded.bytes);
+      _listenedSource = null;
+    });
+    _listen();
   }
 
   void _listen() {
@@ -194,22 +203,21 @@ class _ComicPageState extends State<_ComicPage> {
     });
   }
 
-  bool _allowPan(Offset delta) {
+  bool _allowPan(Offset total) {
     final frame = _frame;
     if (frame == null) return false;
-    final horizontal = delta.dx.abs() >= delta.dy.abs();
+    final horizontal = total.dx.abs() >= total.dy.abs();
+    // Horizontal drags at the initial scale belong to the page view. Claiming
+    // them makes the page swipe wait out the gesture arena and feel stuck.
+    if (horizontal) {
+      return widget.scale != .original && _scale > 1.001;
+    }
     if (widget.scale != .original && _scale > 1.001) return true;
-
-    final width = frame.base.width;
     final height = frame.base.height;
     if (widget.scale == .original) {
-      return horizontal
-          ? (width - frame.viewWidth).abs() > 0.5
-          : (height - frame.viewHeight).abs() > 0.5;
+      return (height - frame.viewHeight).abs() > 0.5;
     }
-    return horizontal
-        ? width > frame.viewWidth + 0.5
-        : height > frame.viewHeight + 0.5;
+    return height > frame.viewHeight + 0.5;
   }
 
   void _onScaleStart(ScaleStartDetails details) {
@@ -478,15 +486,14 @@ class _ComicScaleRecognizer extends ScaleGestureRecognizer {
     }
     if (event is PointerMoveEvent && _pointers.length < 2) {
       _moved += event.delta;
-      if (_moved.distance > kTouchSlop) {
-        final allowed = allowPan?.call(event.delta) ?? false;
-        if (!allowed) {
-          resolve(.rejected);
-          stopTrackingPointer(event.pointer);
-          return;
-        }
-        resolve(.accepted);
+      if (_moved.distance <= kTouchSlop) return;
+      final allowed = allowPan?.call(_moved) ?? false;
+      if (!allowed) {
+        resolve(.rejected);
+        stopTrackingPointer(event.pointer);
+        return;
       }
+      resolve(.accepted);
     }
     super.handleEvent(event);
   }
@@ -497,6 +504,17 @@ class _ComicScaleRecognizer extends ScaleGestureRecognizer {
     _moved = Offset.zero;
     super.didStopTrackingLastPointer(pointer);
   }
+}
+
+({Uint8List bytes, int width, int height})? _decodeComicImage(String source) {
+  final bytes = _decodeDataUri(source);
+  if (bytes == null) return null;
+  final size = imagePixelSize(bytes);
+  return (
+    bytes: bytes,
+    width: size?.width ?? 0,
+    height: size?.height ?? 0,
+  );
 }
 
 List<String> _imageSources(String html) {
