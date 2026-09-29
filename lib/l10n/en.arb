@@ -638,7 +638,7 @@
     "@imageScale": {
         "description": "Label for comic EPUB image scale"
     },
-    "imageScaleFit": "Fit page",
+    "imageScaleFit": "Fit screen",
     "@imageScaleFit": {
         "description": "Scale the comic image so the whole picture fits on screen"
     },

@@ -537,15 +537,15 @@
     "@imageScale": {
         "description": "Label for comic EPUB image scale"
     },
-    "imageScaleFit": "图片大小自适应",
+    "imageScaleFit": "适应屏幕",
     "@imageScaleFit": {
         "description": "Scale the comic image so the whole picture fits on screen"
     },
-    "imageScaleFitWidth": "X方向自适应",
+    "imageScaleFitWidth": "适应宽度",
     "@imageScaleFitWidth": {
         "description": "Scale the comic image to the screen width"
     },
-    "imageScaleOriginal": "原图大小",
+    "imageScaleOriginal": "原始大小",
     "@imageScaleOriginal": {
         "description": "Show the comic image at its source pixel size"
     },
