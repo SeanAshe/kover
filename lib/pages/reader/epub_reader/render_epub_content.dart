@@ -15,6 +15,7 @@ class RenderEpubContent extends ConsumerWidget {
   final Map<String, Map<String, String>> styles;
   final CachedImageFactory? imageCache;
   final bool verticalPadding;
+  final bool previewImages;
 
   const RenderEpubContent({
     super.key,
@@ -23,6 +24,7 @@ class RenderEpubContent extends ConsumerWidget {
     required this.styles,
     this.imageCache,
     this.verticalPadding = true,
+    this.previewImages = true,
   });
 
   @override
@@ -63,7 +65,10 @@ class RenderEpubContent extends ConsumerWidget {
                 html,
                 buildAsync: false,
                 enableCaching: true,
-                factoryBuilder: () => imageCache ?? CachedImageFactory(),
+                factoryBuilder: () {
+                  final factory = imageCache ?? CachedImageFactory();
+                  return previewImages ? factory : factory.withoutPreview();
+                },
                 customStylesBuilder: (element) {
                   final s = Map<String, String>.from(
                     mergedStyles[element.localName] ?? {},

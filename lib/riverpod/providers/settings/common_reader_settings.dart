@@ -17,7 +17,7 @@ sealed class CommonReaderSettingsState with _$CommonReaderSettingsState {
   const factory CommonReaderSettingsState({
     @Default(ReadDirection.leftToRight) ReadDirection readDirection,
     @Default(OrientationLock.none) OrientationLock orientationLock,
-    @Default(true) bool showProgressBar,
+    @Default(false) bool showProgressBar,
     @Default(true) bool navigationGersturesEnabled,
   }) = _CommonReaderSettingsState;
 
