@@ -42,6 +42,28 @@ class _BelowInsetClipper extends CustomClipper<Rect> {
   }
 }
 
+/// While any comic image is zoomed, horizontal page swipes stay disabled.
+class ComicSwipeLock extends InheritedWidget {
+  final ValueNotifier<int> zoomedCount;
+
+  const ComicSwipeLock({
+    super.key,
+    required this.zoomedCount,
+    required super.child,
+  });
+
+  static ValueNotifier<int>? maybeOf(BuildContext context) {
+    return context
+        .getInheritedWidgetOfExactType<ComicSwipeLock>()
+        ?.zoomedCount;
+  }
+
+  @override
+  bool updateShouldNotify(ComicSwipeLock oldWidget) {
+    return zoomedCount != oldWidget.zoomedCount;
+  }
+}
+
 /// Renders only the images in a comic EPUB page.
 class EpubComicImages extends StatelessWidget {
   final String html;
@@ -98,6 +120,7 @@ class _ComicPageState extends State<_ComicPage> {
   _ComicFrame? _frame;
 
   int _loadGeneration = 0;
+  bool _swipeLocked = false;
   double _scale = 1;
   Offset _pan = Offset.zero;
   double _gestureScale = 1;
@@ -132,11 +155,15 @@ class _ComicPageState extends State<_ComicPage> {
     if (oldWidget.scale != widget.scale) {
       _scale = 1;
       _pan = Offset.zero;
+      _syncSwipeLock();
     }
   }
 
   @override
   void dispose() {
+    if (_swipeLocked) {
+      ComicSwipeLock.maybeOf(context)?.value -= 1;
+    }
     _stopListening();
     super.dispose();
   }
@@ -201,6 +228,17 @@ class _ComicPageState extends State<_ComicPage> {
       _scale = scale;
       _pan = pan;
     });
+    _syncSwipeLock();
+  }
+
+  void _syncSwipeLock() {
+    final zoomed = _scale > 1.001;
+    if (zoomed == _swipeLocked) return;
+    final zoomedCount = ComicSwipeLock.maybeOf(context);
+    if (zoomedCount != null) {
+      zoomedCount.value += zoomed ? 1 : -1;
+    }
+    _swipeLocked = zoomed;
   }
 
   bool _allowPan(Offset total) {
@@ -267,6 +305,11 @@ class _ComicPageState extends State<_ComicPage> {
           _laidOutNotch = notch;
           _scale = 1;
           _pan = Offset.zero;
+          if (_swipeLocked) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) _syncSwipeLock();
+            });
+          }
         }
 
         return SizedBox(
@@ -315,6 +358,7 @@ class _ComicPageState extends State<_ComicPage> {
               _ComicScaleRecognizer.new,
               (recognizer) {
                 recognizer.allowPan = _allowPan;
+                recognizer.captureDrags = () => _scale > 1.001;
                 recognizer.onStart = _onScaleStart;
                 recognizer.onUpdate = _onScaleUpdate;
               },
@@ -457,6 +501,7 @@ class _ComicScaleRecognizer extends ScaleGestureRecognizer {
   _ComicScaleRecognizer();
 
   bool Function(Offset delta)? allowPan;
+  bool Function()? captureDrags;
   final Set<int> _pointers = {};
   Offset _moved = Offset.zero;
 
@@ -477,6 +522,11 @@ class _ComicScaleRecognizer extends ScaleGestureRecognizer {
     }
     if (event is PointerMoveEvent && _pointers.length < 2) {
       _moved += event.delta;
+      if ((captureDrags?.call() ?? false) && _moved.distance > 2) {
+        resolve(.accepted);
+        super.handleEvent(event);
+        return;
+      }
       if (_moved.distance <= kTouchSlop) return;
       final allowed = allowPan?.call(_moved) ?? false;
       if (!allowed) {

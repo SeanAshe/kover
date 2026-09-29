@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/reader/epub_reader/epub_comic_images.dart';
 import 'package:kover/pages/reader/epub_reader/is_comic_epub.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
@@ -47,7 +48,14 @@ class const EpubHorizontalSubpages({
         : data.reflow.subpages.length;
     final spreadCount = (count + 1) ~/ 2;
 
-    final canScroll = data.navigationGesturesEnabled && !data.reduceAnimations;
+    final zoomedCount = useMemoized(() => ValueNotifier(0));
+    useEffect(() => zoomedCount.dispose, [zoomedCount]);
+    useListenable(zoomedCount);
+
+    final canScroll =
+        data.navigationGesturesEnabled &&
+        !data.reduceAnimations &&
+        zoomedCount.value == 0;
     final scrollPhysics = canScroll
         ? const AlwaysScrollableScrollPhysics(
             parent: ClampingScrollPhysics(),
@@ -122,7 +130,9 @@ class const EpubHorizontalSubpages({
       return content;
     }
 
-    return PageView.builder(
+    return ComicSwipeLock(
+      zoomedCount: zoomedCount,
+      child: PageView.builder(
       controller: controller,
       allowImplicitScrolling: true,
       scrollCacheExtent: const .viewport(4),
@@ -150,6 +160,7 @@ class const EpubHorizontalSubpages({
           ],
         );
       },
+    ),
     );
   }
 }
