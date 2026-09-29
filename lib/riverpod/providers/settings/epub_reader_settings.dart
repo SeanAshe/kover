@@ -46,6 +46,10 @@ enum EpubReaderMode { horizontal, vertical, spreads }
 
 enum EpubTextAlignment { left, right, justify, center }
 
+/// How a comic EPUB image is scaled. Matches the Mihon reader scales:
+/// fit the page, fit the width, or keep the source pixels.
+enum EpubImageScale { fit, fitWidth, original }
+
 @freezed
 sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
   const EpubReaderSettingsState._();
@@ -62,6 +66,7 @@ sealed class EpubReaderSettingsState with _$EpubReaderSettingsState {
     @Default(EpubReaderMode.horizontal) EpubReaderMode mode,
     @Default(false) bool removeParagraphIndent,
     @Default(EpubTextAlignment.left) EpubTextAlignment textAlignment,
+    @Default(EpubImageScale.fit) EpubImageScale imageScale,
   }) = _EpubReaderSettingsState;
 
   factory EpubReaderSettingsState.fromJson(Map<String, Object?> json) =>
@@ -274,6 +279,16 @@ class EpubReaderSettings extends _$EpubReaderSettings {
     log.info(
       'set mode',
       attributes: {'value': mode, 'reader': 'epub'},
+    );
+  }
+
+  Future<void> setImageScale(EpubImageScale scale) async {
+    final current = await future;
+
+    state = AsyncData(current.copyWith(imageScale: scale));
+    log.info(
+      'set image scale',
+      attributes: {'value': scale, 'reader': 'epub'},
     );
   }
 

@@ -13,6 +13,7 @@ sealed class KoverIcons {
   static const IconData fitWidth = LucideIcons.chevronsLeftRight;
   static const IconData fitHeight = LucideIcons.chevronsUpDown;
   static const IconData fitContain = LucideIcons.fullscreen;
+  static const IconData originalSize = LucideIcons.image;
   static const IconData margins = LucideIcons.panelLeftDashed;
   static const IconData verticalGap = LucideIcons.unfoldVertical;
   static const IconData pageGap = LucideIcons.unfoldHorizontal;

@@ -18,4 +18,9 @@ enum LibraryType {
     .comicvine => .comicLegacy,
     _ => .unknown,
   };
+
+  bool get isComic => switch (this) {
+    .manga || .comic || .comicLegacy => true,
+    _ => false,
+  };
 }

@@ -634,6 +634,22 @@
     "@twoPage": {
         "description": "Label for the two page reader mode option"
     },
+    "imageScale": "Image size",
+    "@imageScale": {
+        "description": "Label for comic EPUB image scale"
+    },
+    "imageScaleFit": "Fit page",
+    "@imageScaleFit": {
+        "description": "Scale the comic image so the whole picture fits on screen"
+    },
+    "imageScaleFitWidth": "Fit width",
+    "@imageScaleFitWidth": {
+        "description": "Scale the comic image to the screen width"
+    },
+    "imageScaleOriginal": "Original size",
+    "@imageScaleOriginal": {
+        "description": "Show the comic image at its source pixel size"
+    },
     "fitDirection": "Fit Direction",
     "@fitDirection": {
         "description": "Label for the image fit direction setting"

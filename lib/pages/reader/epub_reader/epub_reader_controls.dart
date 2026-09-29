@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:kover/generated/l10n/app_localizations.dart';
 import 'package:kover/pages/reader/epub_reader/font_select_option.dart';
 import 'package:kover/pages/reader/epub_reader/theme_picker.dart';
+import 'package:kover/pages/reader/epub_reader/is_comic_epub.dart';
 import 'package:kover/riverpod/providers/breakpoints.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
@@ -28,6 +29,7 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
     final epubSettings = epubReaderSettingsProvider(seriesId: seriesId);
     final commonSettings = commonReaderSettingsProvider(seriesId: seriesId);
     final breakpoint = ref.watch(breakpointsProvider);
+    final isComic = isComicEpub(ref, seriesId: seriesId);
 
     return Async(
       asyncValue: ref.watch(epubSettings),
@@ -81,130 +83,160 @@ class EpubReaderSettingsBottomSheet extends ConsumerWidget {
                               .setMode(newValue);
                         },
                       ),
-                      FontSelectOption(seriesId: seriesId),
-                      NumericOption(
-                        icon: KoverIcons.fontSize,
-                        title: l.fontSize,
-                        value: settings.fontSize,
-                        min: EpubReaderSettingsLimits.fontSizeMin,
-                        max: EpubReaderSettingsLimits.fontSizeMax,
-                        step: EpubReaderSettingsLimits.fontSizeStep,
-                        decimalPlaces: 0,
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setFontSize(newValue),
-                      ),
-                      NumericOption(
-                        icon: KoverIcons.margins,
-                        title: l.margins,
-                        value: settings.marginSize,
-                        min: EpubReaderSettingsLimits.marginSizeMin,
-                        max: EpubReaderSettingsLimits.marginSizeMax,
-                        step: EpubReaderSettingsLimits.marginSizeStep,
-                        decimalPlaces: 0,
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setMarginSize(newValue),
-                      ),
-                      NumericOption(
-                        icon: KoverIcons.paragraphSpacing,
-                        title: l.paragraphSpacing,
-                        value: settings.paragraphSpacing,
-                        decimalPlaces: 1,
-                        min: EpubReaderSettingsLimits.paragraphSpacingMin,
-                        max: EpubReaderSettingsLimits.paragraphSpacingMax,
-                        step: EpubReaderSettingsLimits.paragraphSpacingStep,
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setParagraphSpacing(newValue),
-                      ),
-                      NumericOption(
-                        icon: KoverIcons.lineHeight,
-                        title: l.lineHeight,
-                        value: settings.lineHeight,
-                        min: EpubReaderSettingsLimits.lineHeightMin,
-                        max: EpubReaderSettingsLimits.lineHeightMax,
-                        step: EpubReaderSettingsLimits.lineHeightStep,
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setLineHeight(newValue),
-                      ),
-                      NumericOption(
-                        icon: KoverIcons.wordSpacing,
-                        value: settings.wordSpacing,
-                        title: l.wordSpacing,
-                        min: EpubReaderSettingsLimits.wordSpacingMin,
-                        max: EpubReaderSettingsLimits.wordSpacingMax,
-                        step: EpubReaderSettingsLimits.wordSpacingStep,
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setWordSpacing(newValue),
-                      ),
-                      NumericOption(
-                        icon: KoverIcons.letterSpacing,
-                        title: l.letterSpacing,
-                        value: settings.letterSpacing,
-                        min: EpubReaderSettingsLimits.letterSpacingMin,
-                        max: EpubReaderSettingsLimits.letterSpacingMax,
-                        step: EpubReaderSettingsLimits.letterSpacingStep,
-                        onChanged: (newValue) async => await ref
-                            .read(epubSettings.notifier)
-                            .setLetterSpacing(newValue),
-                      ),
-                      BooleanOption(
-                        icon: KoverIcons.removeParagraphIndent,
-                        title: l.removeParagraphIndentation,
-                        description: l.removeParagraphIndentationDescription,
-                        value: settings.removeParagraphIndent,
-                        onChanged: (value) async {
-                          await ref
+                      if (isComic)
+                        ChoiceOption<EpubImageScale>(
+                          title: l.imageScale,
+                          value: settings.imageScale,
+                          options: [
+                            ChoiceOptionEntry(
+                              value: .fit,
+                              label: l.imageScaleFit,
+                              icon: KoverIcons.fitContain,
+                            ),
+                            ChoiceOptionEntry(
+                              value: .fitWidth,
+                              label: l.imageScaleFitWidth,
+                              icon: KoverIcons.fitWidth,
+                            ),
+                            ChoiceOptionEntry(
+                              value: .original,
+                              label: l.imageScaleOriginal,
+                              icon: KoverIcons.originalSize,
+                            ),
+                          ],
+                          onChanged: (newValue) async {
+                            if (newValue == settings.imageScale) return;
+                            await ref
+                                .read(epubSettings.notifier)
+                                .setImageScale(newValue);
+                          },
+                        ),
+                      if (!isComic) ...[
+                        FontSelectOption(seriesId: seriesId),
+                        NumericOption(
+                          icon: KoverIcons.fontSize,
+                          title: l.fontSize,
+                          value: settings.fontSize,
+                          min: EpubReaderSettingsLimits.fontSizeMin,
+                          max: EpubReaderSettingsLimits.fontSizeMax,
+                          step: EpubReaderSettingsLimits.fontSizeStep,
+                          decimalPlaces: 0,
+                          onChanged: (newValue) async => await ref
                               .read(epubSettings.notifier)
-                              .setRemoveParagraphIndent(value);
-                        },
-                      ),
-                      ChoiceOption<EpubTextAlignment>(
-                        title: l.textAlignment,
-                        value: settings.textAlignment,
-                        onChanged: (newValue) async {
-                          await ref
+                              .setFontSize(newValue),
+                        ),
+                        NumericOption(
+                          icon: KoverIcons.margins,
+                          title: l.margins,
+                          value: settings.marginSize,
+                          min: EpubReaderSettingsLimits.marginSizeMin,
+                          max: EpubReaderSettingsLimits.marginSizeMax,
+                          step: EpubReaderSettingsLimits.marginSizeStep,
+                          decimalPlaces: 0,
+                          onChanged: (newValue) async => await ref
                               .read(epubSettings.notifier)
-                              .setTextAlignment(newValue);
-                        },
-                        options: [
-                          ChoiceOptionEntry(
-                            value: .left,
-                            icon: KoverIcons.textAlignLeft,
-                            label: l.left,
-                          ),
-                          ChoiceOptionEntry(
-                            value: .justify,
-                            icon: KoverIcons.textAlignJustify,
-                            label: l.justify,
-                          ),
-                          ChoiceOptionEntry(
-                            value: .center,
-                            icon: KoverIcons.textAlignCenter,
-                            label: l.center,
-                          ),
-                          ChoiceOptionEntry(
-                            value: .right,
-                            icon: KoverIcons.textAlignRight,
-                            label: l.right,
-                          ),
-                        ],
-                      ),
+                              .setMarginSize(newValue),
+                        ),
+                        NumericOption(
+                          icon: KoverIcons.paragraphSpacing,
+                          title: l.paragraphSpacing,
+                          value: settings.paragraphSpacing,
+                          decimalPlaces: 1,
+                          min: EpubReaderSettingsLimits.paragraphSpacingMin,
+                          max: EpubReaderSettingsLimits.paragraphSpacingMax,
+                          step: EpubReaderSettingsLimits.paragraphSpacingStep,
+                          onChanged: (newValue) async => await ref
+                              .read(epubSettings.notifier)
+                              .setParagraphSpacing(newValue),
+                        ),
+                        NumericOption(
+                          icon: KoverIcons.lineHeight,
+                          title: l.lineHeight,
+                          value: settings.lineHeight,
+                          min: EpubReaderSettingsLimits.lineHeightMin,
+                          max: EpubReaderSettingsLimits.lineHeightMax,
+                          step: EpubReaderSettingsLimits.lineHeightStep,
+                          onChanged: (newValue) async => await ref
+                              .read(epubSettings.notifier)
+                              .setLineHeight(newValue),
+                        ),
+                        NumericOption(
+                          icon: KoverIcons.wordSpacing,
+                          value: settings.wordSpacing,
+                          title: l.wordSpacing,
+                          min: EpubReaderSettingsLimits.wordSpacingMin,
+                          max: EpubReaderSettingsLimits.wordSpacingMax,
+                          step: EpubReaderSettingsLimits.wordSpacingStep,
+                          onChanged: (newValue) async => await ref
+                              .read(epubSettings.notifier)
+                              .setWordSpacing(newValue),
+                        ),
+                        NumericOption(
+                          icon: KoverIcons.letterSpacing,
+                          title: l.letterSpacing,
+                          value: settings.letterSpacing,
+                          min: EpubReaderSettingsLimits.letterSpacingMin,
+                          max: EpubReaderSettingsLimits.letterSpacingMax,
+                          step: EpubReaderSettingsLimits.letterSpacingStep,
+                          onChanged: (newValue) async => await ref
+                              .read(epubSettings.notifier)
+                              .setLetterSpacing(newValue),
+                        ),
+                        BooleanOption(
+                          icon: KoverIcons.removeParagraphIndent,
+                          title: l.removeParagraphIndentation,
+                          description: l.removeParagraphIndentationDescription,
+                          value: settings.removeParagraphIndent,
+                          onChanged: (value) async {
+                            await ref
+                                .read(epubSettings.notifier)
+                                .setRemoveParagraphIndent(value);
+                          },
+                        ),
+                        ChoiceOption<EpubTextAlignment>(
+                          title: l.textAlignment,
+                          value: settings.textAlignment,
+                          onChanged: (newValue) async {
+                            await ref
+                                .read(epubSettings.notifier)
+                                .setTextAlignment(newValue);
+                          },
+                          options: [
+                            ChoiceOptionEntry(
+                              value: .left,
+                              icon: KoverIcons.textAlignLeft,
+                              label: l.left,
+                            ),
+                            ChoiceOptionEntry(
+                              value: .justify,
+                              icon: KoverIcons.textAlignJustify,
+                              label: l.justify,
+                            ),
+                            ChoiceOptionEntry(
+                              value: .center,
+                              icon: KoverIcons.textAlignCenter,
+                              label: l.center,
+                            ),
+                            ChoiceOptionEntry(
+                              value: .right,
+                              icon: KoverIcons.textAlignRight,
+                              label: l.right,
+                            ),
+                          ],
+                        ),
+                        BooleanOption(
+                          icon: KoverIcons.highlight,
+                          title: l.highlightResumeParagraph,
+                          value: settings.highlightResumePoint,
+                          onChanged: (value) async {
+                            await ref
+                                .read(epubSettings.notifier)
+                                .setHighlightResumePoint(value);
+                          },
+                        ),
+                      ],
                       if (SafePlatform.isMobile)
                         OrientationOption(seriesId: seriesId),
-                      BooleanOption(
-                        icon: KoverIcons.highlight,
-                        title: l.highlightResumeParagraph,
-                        value: settings.highlightResumePoint,
-                        onChanged: (value) async {
-                          await ref
-                              .read(epubSettings.notifier)
-                              .setHighlightResumePoint(value);
-                        },
-                      ),
                       ProgressBarOption(seriesId: seriesId),
                       NavigationGesturesOption(seriesId: seriesId),
                     ],

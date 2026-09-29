@@ -1,5 +1,7 @@
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/reader/epub_reader/epub_comic_images.dart';
+import 'package:kover/pages/reader/epub_reader/is_comic_epub.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content_provider.dart';
 import 'package:kover/riverpod/providers/settings/epub_reader_settings.dart';
 import 'package:kover/utils/cached_image_factory.dart';
@@ -28,10 +30,18 @@ class RenderEpubContent extends ConsumerWidget {
     final model = ref.watch(
       renderEpubContentProvider(seriesId: seriesId),
     );
+    final isComic = isComicEpub(ref, seriesId: seriesId);
 
     return Async(
       asyncValue: model,
       data: (data) {
+        if (isComic) {
+          return EpubComicImages(
+            html: html,
+            scale: data.epubSettings.imageScale,
+          );
+        }
+
         final mergedStyles = Map<String, Map<String, String>>.from(styles);
         for (final entry in data.customCss.entries) {
           mergedStyles[entry.key] = {

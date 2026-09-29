@@ -9,7 +9,9 @@ import 'package:html/dom.dart';
 import 'package:kover/models/page_content.dart';
 import 'package:kover/riverpod/managers/font_manager.dart';
 import 'package:kover/riverpod/providers/book.dart';
+import 'package:kover/riverpod/providers/library.dart';
 import 'package:kover/riverpod/providers/reader.dart';
+import 'package:kover/riverpod/providers/series.dart';
 import 'package:kover/riverpod/providers/reader/reader.dart';
 import 'package:kover/riverpod/providers/reader/reader_navigation.dart';
 import 'package:kover/riverpod/providers/settings/common_reader_settings.dart';
@@ -100,18 +102,27 @@ class EpubReflow extends _$EpubReflow {
     final progress = await progressFuture;
     final settings = await settingsFuture;
     final pageContent = await pageContentFuture;
+    final series = await ref.watch(seriesProvider(seriesId: seriesId).future);
+    final library = await ref.watch(
+      libraryProvider(libraryId: series.libraryId).future,
+    );
+    final content = library.type.isComic
+        ? pageContent.copyWith(root: pageContent.root.comicImagesOnly())
+        : pageContent;
 
     String? resumeScrollId;
     if (progress != null && page == progress.pageNum) {
       resumeScrollId = progress.bookScrollId;
     }
 
-    if (settings.fontFamily != null) {
+    if (settings.fontFamily != null && !library.type.isComic) {
       await fontManager.ensureServerFontLoaded(settings.fontFamily!);
     }
-    await fontManager.ensureLoaded(pageContent.fonts);
+    if (!library.type.isComic) {
+      await fontManager.ensureLoaded(pageContent.fonts);
+    }
 
-    final existingHighlight = pageContent.root.querySelector(
+    final existingHighlight = content.root.querySelector(
       '.${HtmlConstants.resumeParagraphClass}',
     );
     if (existingHighlight != null) {
@@ -119,7 +130,7 @@ class EpubReflow extends _$EpubReflow {
     }
 
     if (settings.highlightResumePoint && resumeScrollId != null) {
-      final resumePoint = pageContent.root.querySelector(
+      final resumePoint = content.root.querySelector(
         '[${HtmlConstants.scrollIdAttribute}="${resumeScrollId.cssEscaped}"]',
       );
       if (resumePoint != null && resumePoint.hasChildNodes()) {
@@ -127,10 +138,19 @@ class EpubReflow extends _$EpubReflow {
       }
     }
 
-    _cursor = BinaryReflowEngine(root: pageContent.root.children.first);
+    if (content.root.children.isEmpty) {
+      return EpubReflowState(
+        page: content,
+        scrollId: resumeScrollId,
+        status: .done,
+        subpages: [DocumentFragment()],
+      );
+    }
+
+    _cursor = BinaryReflowEngine(root: content.root.children.first);
 
     return EpubReflowState(
-      page: pageContent,
+      page: content,
       scrollId: resumeScrollId,
     );
   }

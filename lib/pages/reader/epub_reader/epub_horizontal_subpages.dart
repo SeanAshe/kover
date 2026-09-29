@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:kover/pages/reader/epub_reader/is_comic_epub.dart';
 import 'package:kover/pages/reader/epub_reader/render_epub_content.dart';
 import 'package:kover/riverpod/providers/reader/epub_reader.dart';
 import 'package:kover/utils/cached_image_factory.dart';
@@ -31,6 +32,7 @@ class const EpubHorizontalSubpages({
       readingListId: readingListId,
     );
     final data = subpageState.requireValue;
+    final isComic = isComicEpub(ref, seriesId: seriesId);
 
     final spreads = data.mode == .spreads;
     final controller = usePageController(
@@ -103,15 +105,24 @@ class const EpubHorizontalSubpages({
         return const SizedBox.shrink();
       }
 
-      return OverflowBox(
-        maxHeight: double.infinity,
-        alignment: .topCenter,
-        child: RenderEpubContent(
-          seriesId: seriesId,
-          html: data.reflow.subpages[index].outerHtml,
-          styles: data.reflow.page.styles,
-          imageCache: imageCache,
-        ),
+      final content = RenderEpubContent(
+        seriesId: seriesId,
+        html: data.reflow.subpages[index].outerHtml,
+        styles: data.reflow.page.styles,
+        imageCache: imageCache,
+      );
+      if (!isComic) {
+        return OverflowBox(
+          maxHeight: double.infinity,
+          alignment: .topCenter,
+          child: content,
+        );
+      }
+
+      // Tall fit-width and original-size pages can be panned inside the page.
+      return SingleChildScrollView(
+        primary: false,
+        child: content,
       );
     }
 
