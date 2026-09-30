@@ -141,12 +141,19 @@ class EpubImagePreview extends StatefulWidget {
 class _EpubImagePreviewState extends State<EpubImagePreview> {
   static const _maxScale = 6.0;
 
-  final _transform = TransformationController();
   ImageStream? _stream;
   ImageStreamListener? _listener;
   Size? _pixelSize;
   bool _failed = false;
   bool _acceptRebuild = false;
+  double _scale = 1;
+  double _minScale = 1;
+  Offset _topLeft = Offset.zero;
+  double _gestureScale = 1;
+  Offset _gestureFocal = Offset.zero;
+  Offset _gestureTopLeft = Offset.zero;
+  Size? _view;
+  Size? _base;
 
   @override
   void initState() {
@@ -162,7 +169,11 @@ class _EpubImagePreviewState extends State<EpubImagePreview> {
       _stopImage();
       _pixelSize = null;
       _failed = false;
-      _transform.value = Matrix4.identity();
+      _scale = 1;
+      _minScale = 1;
+      _topLeft = Offset.zero;
+      _view = null;
+      _base = null;
       _resolveImage();
     }
   }
@@ -170,7 +181,6 @@ class _EpubImagePreviewState extends State<EpubImagePreview> {
   @override
   void dispose() {
     _stopImage();
-    _transform.dispose();
     super.dispose();
   }
 
@@ -255,23 +265,94 @@ class _EpubImagePreviewState extends State<EpubImagePreview> {
     );
   }
 
+  /// Scale that fits [natural] inside [view]. This is the preview's 1x:
+  /// smaller images are enlarged, larger ones are shrunk, and pinch zoom
+  /// starts here instead of at the bitmap's original pixel size.
+  double _fitScale(Size view, Size natural) {
+    return math.min(
+      view.width / natural.width,
+      view.height / natural.height,
+    );
+  }
+
+  Offset _clamp(Offset topLeft, double scale, Size view, Size base) {
+    final width = base.width * scale;
+    final height = base.height * scale;
+    final dx = width <= view.width
+        ? (view.width - width) / 2
+        : topLeft.dx.clamp(view.width - width, 0.0).toDouble();
+    final dy = height <= view.height
+        ? (view.height - height) / 2
+        : topLeft.dy.clamp(view.height - height, 0.0).toDouble();
+    return Offset(dx, dy);
+  }
+
+  void _onScaleStart(ScaleStartDetails details) {
+    _gestureScale = _scale;
+    _gestureFocal = details.localFocalPoint;
+    _gestureTopLeft = _topLeft;
+  }
+
+  void _onScaleUpdate(ScaleUpdateDetails details) {
+    final view = _view;
+    final base = _base;
+    if (view == null || base == null) return;
+    final minScale = _minScale;
+    final newScale = (_gestureScale * details.scale).clamp(
+      minScale,
+      minScale * _maxScale,
+    );
+    if (newScale <= minScale * 1.001) {
+      setState(() {
+        _scale = minScale;
+        _topLeft = _clamp(Offset.zero, minScale, view, base);
+      });
+      return;
+    }
+    final local = (_gestureFocal - _gestureTopLeft) / _gestureScale;
+    final topLeft = details.localFocalPoint - local * newScale;
+    setState(() {
+      _scale = newScale;
+      _topLeft = _clamp(topLeft, newScale, view, base);
+    });
+  }
+
   Widget _zoomable(Size source, Widget child) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final view = Size(constraints.maxWidth, constraints.maxHeight);
-        final fitted = widget.svgBytes != null
+        final natural = widget.svgBytes != null
             ? view
-            : applyBoxFit(.contain, source, view).destination;
-        return InteractiveViewer(
-          transformationController: _transform,
-          constrained: false,
-          minScale: 1,
-          maxScale: _maxScale,
-          clipBehavior: Clip.hardEdge,
-          child: SizedBox(
-            width: math.max(1, fitted.width),
-            height: math.max(1, fitted.height),
-            child: child,
+            : Size(
+                math.max(1, source.width),
+                math.max(1, source.height),
+              );
+        final fit = _fitScale(view, natural);
+        if (_view != view || _base != natural || _minScale != fit) {
+          _view = view;
+          _base = natural;
+          _minScale = fit;
+          _scale = fit;
+          _topLeft = _clamp(Offset.zero, fit, view, natural);
+        }
+        final topLeft = _clamp(_topLeft, _scale, view, natural);
+
+        return GestureDetector(
+          behavior: .opaque,
+          onScaleStart: _onScaleStart,
+          onScaleUpdate: _onScaleUpdate,
+          child: ClipRect(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: topLeft.dx,
+                  top: topLeft.dy,
+                  width: natural.width * _scale,
+                  height: natural.height * _scale,
+                  child: child,
+                ),
+              ],
+            ),
           ),
         );
       },
